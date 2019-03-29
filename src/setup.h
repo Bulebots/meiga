@@ -24,6 +24,7 @@
 
 /** System clock frequency is set in `setup_clock` */
 #define SYSCLK_FREQUENCY_HZ 168000000
+#define SPEAKER_BASE_FREQUENCY_HZ 1000000
 #define SYSTICK_FREQUENCY_HZ 1000
 
 void setup(void);

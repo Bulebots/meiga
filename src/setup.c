@@ -23,7 +23,11 @@ static void setup_clock(void)
 
 	/* GPIOs */
 	rcc_periph_clock_enable(RCC_GPIOA);
+	rcc_periph_clock_enable(RCC_GPIOB);
 	rcc_periph_clock_enable(RCC_GPIOC);
+
+	/* Timers */
+	rcc_periph_clock_enable(RCC_TIM11);
 
 	/* Enable clock cycle counter */
 	dwt_enable_cycle_counter();
@@ -73,6 +77,39 @@ static void setup_gpio(void)
 	gpio_mode_setup(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE,
 			GPIO0 | GPIO1 | GPIO2 | GPIO3);
 	gpio_clear(GPIOA, GPIO0 | GPIO1 | GPIO2 | GPIO3);
+
+	/* Speaker */
+	gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9);
+	gpio_set_af(GPIOB, GPIO_AF3, GPIO9);
+}
+
+/**
+ * @brief Setup PWM for the speaker.
+ *
+ * TIM11 is used to generate the PWM signals for the speaker:
+ *
+ * - Edge-aligned, up-counting timer.
+ * - Prescale to increment timer counter at SPEAKER_BASE_FREQUENCY_HZ.
+ * - Set output compare mode to PWM1 (output is active when the counter is
+ *   less than the compare register contents and inactive otherwise.
+ * - Disable output compare output (speaker is off by default).
+ *
+ * @see Reference manual (RM0090) "General-purpose timers (TIM9 to TIM14)"
+ * and in particular the "PWM mode" section.
+ */
+static void setup_speaker(void)
+{
+	timer_set_mode(TIM11, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE,
+		       TIM_CR1_DIR_UP);
+
+	timer_set_prescaler(
+	    TIM11, (rcc_apb2_frequency / SPEAKER_BASE_FREQUENCY_HZ - 1));
+	timer_set_repetition_counter(TIM11, 0);
+	timer_enable_preload(TIM11);
+	timer_continuous_mode(TIM11);
+
+	timer_disable_oc_output(TIM11, TIM_OC1);
+	timer_set_oc_mode(TIM11, TIM_OC1, TIM_OCM_PWM1);
 }
 
 /**
@@ -82,5 +119,6 @@ void setup(void)
 {
 	setup_clock();
 	setup_gpio();
+	setup_speaker();
 	setup_systick();
 }
