@@ -26,6 +26,25 @@
 #define SYSCLK_FREQUENCY_HZ 168000000
 #define SPEAKER_BASE_FREQUENCY_HZ 1000000
 #define SYSTICK_FREQUENCY_HZ 1000
+#define DRIVER_PWM_PERIOD 1024
+
+/**
+ * Maximum PWM period (should be <= DRIVER_PWM_PERIOD).
+ *
+ * Usually it should be set to DRIVER_PWM_PERIOD except for testing purposes
+ * in order to protect the locomotion system and avoid reaching uncontrolled
+ * speeds.
+ */
+#define MAX_PWM_PERIOD 1024
+
+/**
+ * Maximum time period allowed with saturated PWM output.
+ *
+ * After reaching this period we consider there has been a collision. When a
+ * collision occurs, the robot motor control stops working and the motor driver
+ * is disabled.
+ */
+#define MAX_PWM_SATURATION_PERIOD 0.01
 
 void setup(void);
 void enable_systick_interruption(void);

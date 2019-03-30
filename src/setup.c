@@ -27,6 +27,7 @@ static void setup_clock(void)
 	rcc_periph_clock_enable(RCC_GPIOC);
 
 	/* Timers */
+	rcc_periph_clock_enable(RCC_TIM8);
 	rcc_periph_clock_enable(RCC_TIM11);
 
 	/* Enable clock cycle counter */
@@ -70,6 +71,9 @@ void disable_systick_interruption(void)
  * @brief Initial GPIO configuration.
  *
  * Set GPIO modes and initial states.
+ *
+ * @see STM32F405RG datasheet and in particular the "Alternate function
+ * mapping" section.
  */
 static void setup_gpio(void)
 {
@@ -81,6 +85,60 @@ static void setup_gpio(void)
 	/* Speaker */
 	gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9);
 	gpio_set_af(GPIOB, GPIO_AF3, GPIO9);
+
+	/* Motor driver */
+	gpio_mode_setup(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE,
+			GPIO6 | GPIO7 | GPIO8 | GPIO9);
+	gpio_set_af(GPIOC, GPIO_AF3, GPIO6 | GPIO7 | GPIO8 | GPIO9);
+}
+
+/**
+ * @brief Setup PWM for the motor drivers.
+ *
+ * TIM8 is used to generate both PWM signals (left and right motor):
+ *
+ * - Edge-aligned, up-counting timer.
+ * - Prescale to increment timer counter at 24 MHz.
+ * - Set PWM frequency to 24 kHz.
+ * - Configure channels 1, 2, 3 and 4 as output GPIOs.
+ * - Set output compare mode to PWM1 (output is active when the counter is
+ *   less than the compare register contents and inactive otherwise.
+ * - Reset output compare value (set it to 0).
+ * - Enable channels 1, 2, 3 and 4 outputs.
+ * - Enable outputs in the break subsystem (required on an advanced timer).
+ * - Enable timer counter.
+ *
+ * @see Reference manual (RM0090) "Advanced-control timers (TIM1 and TIM8)"
+ * and in particular the "PWM mode" section.
+ */
+static void setup_motor_driver(void)
+{
+	timer_set_mode(TIM8, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE,
+		       TIM_CR1_DIR_UP);
+
+	timer_set_prescaler(
+	    TIM8, (rcc_apb2_frequency / 24000000 - 1));
+	timer_set_repetition_counter(TIM8, 0);
+	timer_enable_preload(TIM8);
+	timer_continuous_mode(TIM8);
+	timer_set_period(TIM8, DRIVER_PWM_PERIOD);
+
+	timer_set_oc_mode(TIM8, TIM_OC1, TIM_OCM_PWM1);
+	timer_set_oc_mode(TIM8, TIM_OC2, TIM_OCM_PWM1);
+	timer_set_oc_mode(TIM8, TIM_OC3, TIM_OCM_PWM1);
+	timer_set_oc_mode(TIM8, TIM_OC4, TIM_OCM_PWM1);
+	timer_set_oc_value(TIM8, TIM_OC1, 0);
+	timer_set_oc_value(TIM8, TIM_OC2, 0);
+	timer_set_oc_value(TIM8, TIM_OC3, 0);
+	timer_set_oc_value(TIM8, TIM_OC4, 0);
+	timer_enable_oc_output(TIM8, TIM_OC1);
+	timer_enable_oc_output(TIM8, TIM_OC2);
+	timer_enable_oc_output(TIM8, TIM_OC3);
+	timer_enable_oc_output(TIM8, TIM_OC4);
+
+	timer_enable_break_main_output(TIM8);
+
+	timer_enable_counter(TIM8);
 }
 
 /**
@@ -120,5 +178,6 @@ void setup(void)
 	setup_clock();
 	setup_gpio();
 	setup_speaker();
+	setup_motor_driver();
 	setup_systick();
 }
