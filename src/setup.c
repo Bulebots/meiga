@@ -14,6 +14,9 @@
  *
  * Enable required clocks for the GPIOs and timers as well.
  *
+ * A pull-up resistor is used in RX to avoid a floating input when no
+ * bluetooth is connected, which could trigger incorrect interruptions.
+ *
  * @see Reference manual (RM0090), in particular "Reset and clock control for
  * STM32F405xx" section.
  */
@@ -26,9 +29,15 @@ static void setup_clock(void)
 	rcc_periph_clock_enable(RCC_GPIOB);
 	rcc_periph_clock_enable(RCC_GPIOC);
 
+	/* Bluetooth */
+	rcc_periph_clock_enable(RCC_USART1);
+
 	/* Timers */
 	rcc_periph_clock_enable(RCC_TIM8);
 	rcc_periph_clock_enable(RCC_TIM11);
+
+	/* DMA */
+	rcc_periph_clock_enable(RCC_DMA2);
 
 	/* Enable clock cycle counter */
 	dwt_enable_cycle_counter();
@@ -90,6 +99,26 @@ static void setup_gpio(void)
 	gpio_mode_setup(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE,
 			GPIO6 | GPIO7 | GPIO8 | GPIO9);
 	gpio_set_af(GPIOC, GPIO_AF3, GPIO6 | GPIO7 | GPIO8 | GPIO9);
+
+	/* Bluetooth */
+	gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9 | GPIO10);
+	gpio_set_af(GPIOA, GPIO_AF7, GPIO9 | GPIO10);
+	gpio_set(GPIOA, GPIO10);
+}
+
+/**
+ * @brief Setup USART for bluetooth communication.
+ */
+static void setup_usart(void)
+{
+	usart_set_baudrate(USART1, 921600);
+	usart_set_databits(USART1, 8);
+	usart_set_stopbits(USART1, USART_STOPBITS_1);
+	usart_set_parity(USART1, USART_PARITY_NONE);
+	usart_set_flow_control(USART1, USART_FLOWCONTROL_NONE);
+	usart_set_mode(USART1, USART_MODE_TX_RX);
+
+	usart_enable(USART1);
 }
 
 /**
@@ -179,5 +208,6 @@ void setup(void)
 	setup_gpio();
 	setup_speaker();
 	setup_motor_driver();
+	setup_usart();
 	setup_systick();
 }
