@@ -139,6 +139,9 @@ static void setup_gpio(void)
 	gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9 | GPIO10);
 	gpio_set_af(GPIOA, GPIO_AF7, GPIO9 | GPIO10);
 	gpio_set(GPIOA, GPIO10);
+
+	/* Buttons */
+	gpio_mode_setup(GPIOC, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO13);
 }
 
 /**
