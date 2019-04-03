@@ -10,6 +10,8 @@
 #include "setup.h"
 
 uint32_t read_cycle_counter(void);
+uint16_t read_encoder_left(void);
+uint16_t read_encoder_right(void);
 float get_battery_voltage(void);
 float get_motors_voltage(void);
 void speaker_on(float hz);

@@ -11,6 +11,22 @@ uint32_t read_cycle_counter(void)
 }
 
 /**
+ * @brief Read left motor encoder counter.
+ */
+uint16_t read_encoder_left(void)
+{
+	return (uint16_t)timer_get_counter(TIM3);
+}
+
+/**
+ * @brief Read right motor encoder counter.
+ */
+uint16_t read_encoder_right(void)
+{
+	return (uint16_t)timer_get_counter(TIM4);
+}
+
+/**
  * @brief Function to get battery voltage.
  *
  * The value is converted from bits to voltage taking into account that the

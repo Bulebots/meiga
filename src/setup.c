@@ -33,6 +33,8 @@ static void setup_clock(void)
 	rcc_periph_clock_enable(RCC_USART1);
 
 	/* Timers */
+	rcc_periph_clock_enable(RCC_TIM3);
+	rcc_periph_clock_enable(RCC_TIM4);
 	rcc_periph_clock_enable(RCC_TIM8);
 	rcc_periph_clock_enable(RCC_TIM11);
 
@@ -140,6 +142,11 @@ static void setup_gpio(void)
 			GPIO6 | GPIO7 | GPIO8 | GPIO9);
 	gpio_set_af(GPIOC, GPIO_AF3, GPIO6 | GPIO7 | GPIO8 | GPIO9);
 
+        /* Encoders */
+	gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE,
+                        GPIO4 | GPIO5 | GPIO6 | GPIO7);
+	gpio_set_af(GPIOB, GPIO_AF2, GPIO4 | GPIO5 | GPIO6 | GPIO7);
+
 	/* Bluetooth */
 	gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9 | GPIO10);
 	gpio_set_af(GPIOA, GPIO_AF7, GPIO9 | GPIO10);
@@ -214,6 +221,41 @@ static void setup_motor_driver(void)
 }
 
 /**
+ * @brief Configure timer to read a quadrature encoder.
+ *
+ * - Set the Auto-Reload Register (TIMx_ARR).
+ * - Set the encoder interface mode counting on both TI1 and TI2 edges.
+ * - Configure inputs (see note).
+ * - Enable counter.
+ *
+ * @param[in] timer_peripheral Timer register address base to configure.
+ *
+ * @note It currently always uses channels 1 and 2.
+ *
+ * @see Reference manual (RM0090) "TIM2 to TIM5 functional description" and in
+ * particular "Encoder interface mode" section.
+ */
+static void configure_timer_as_quadrature_encoder(uint32_t timer_peripheral)
+{
+	timer_set_period(timer_peripheral, 0xFFFF);
+	timer_slave_set_mode(timer_peripheral, 0x3);
+	timer_ic_set_input(timer_peripheral, TIM_IC1, TIM_IC_IN_TI1);
+	timer_ic_set_input(timer_peripheral, TIM_IC2, TIM_IC_IN_TI2);
+	timer_enable_counter(timer_peripheral);
+}
+
+/**
+ * @brief Setup timers for the motor encoders.
+ *
+ * TIM3 for the left motor and TIM4 for the right motor are configured.
+ */
+static void setup_encoders(void)
+{
+	configure_timer_as_quadrature_encoder(TIM3);
+	configure_timer_as_quadrature_encoder(TIM4);
+}
+
+/**
  * @brief Setup PWM for the speaker.
  *
  * TIM11 is used to generate the PWM signals for the speaker:
@@ -251,6 +293,7 @@ void setup(void)
 	setup_gpio();
 	setup_speaker();
 	setup_motor_driver();
+	setup_encoders();
 	setup_usart();
 	setup_adc2();
 	setup_systick();
