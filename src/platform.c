@@ -30,6 +30,18 @@ float get_battery_voltage(void)
 }
 
 /**
+ * @brief Function to get the motors voltage.
+ *
+ * In Meiga, this function simply returns the value of the battery voltage.
+ *
+ *@return The motors voltage in volts.
+ */
+float get_motors_voltage(void)
+{
+	return get_battery_voltage();
+}
+
+/**
  * @brief Turn on the speaker to play at the selected frequency.
  *
  * Frequency is set modulating the PWM signal sent to the speaker.
