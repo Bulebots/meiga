@@ -121,6 +121,11 @@ static void setup_gpio(void)
 	/* Battery */
 	gpio_mode_setup(GPIOC, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO4);
 
+	/* Infrared emitters */
+	gpio_mode_setup(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE,
+			GPIO4 | GPIO5 | GPIO6 | GPIO7);
+	gpio_clear(GPIOA, GPIO4 | GPIO5 | GPIO6 | GPIO7);
+
 	/* LEDs */
 	gpio_mode_setup(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE,
 			GPIO0 | GPIO1 | GPIO2 | GPIO3);
