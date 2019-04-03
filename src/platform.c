@@ -11,6 +11,25 @@ uint32_t read_cycle_counter(void)
 }
 
 /**
+ * @brief Function to get battery voltage.
+ *
+ * The value is converted from bits to voltage taking into account that the
+ * battery voltage is read through a voltage divider.
+ *
+ *@return The battery voltage in volts.
+ */
+float get_battery_voltage(void)
+{
+	uint16_t battery_bits;
+
+	adc_start_conversion_regular(ADC2);
+	while (!adc_eoc(ADC2))
+		;
+	battery_bits = adc_read_regular(ADC2);
+	return battery_bits * ADC_LSB * VOLT_DIV_FACTOR;
+}
+
+/**
  * @brief Turn on the speaker to play at the selected frequency.
  *
  * Frequency is set modulating the PWM signal sent to the speaker.

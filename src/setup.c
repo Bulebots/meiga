@@ -36,6 +36,9 @@ static void setup_clock(void)
 	rcc_periph_clock_enable(RCC_TIM8);
 	rcc_periph_clock_enable(RCC_TIM11);
 
+	/* ADC */
+	rcc_periph_clock_enable(RCC_ADC2);
+
 	/* DMA */
 	rcc_periph_clock_enable(RCC_DMA2);
 
@@ -77,6 +80,35 @@ void disable_systick_interruption(void)
 }
 
 /**
+ * @brief Setup for ADC2: configured for regular conversion.
+ *
+ * This ADC is used to read the battery status.
+ *
+ * - Power off the ADC to be sure that does not run during configuration
+ * - Disable scan mode
+ * - Set single conversion mode triggered by software
+ * - Configure the alignment (right)
+ * - Configure the sample time (15 cycles of ADC clock)
+ * - Set regular sequence with `channel_sequence` structure
+ * - Power on the ADC
+ *
+ * @see Reference manual (RM0090) "Analog-to-digital converter".
+ */
+static void setup_adc2(void)
+{
+	uint8_t channel_sequence[16];
+
+	channel_sequence[0] = ADC_CHANNEL14;
+	adc_power_off(ADC2);
+	adc_disable_scan_mode(ADC2);
+	adc_set_single_conversion_mode(ADC2);
+	adc_set_right_aligned(ADC2);
+	adc_set_sample_time_on_all_channels(ADC2, ADC_SMPR_SMP_15CYC);
+	adc_set_regular_sequence(ADC2, 1, channel_sequence);
+	adc_power_on(ADC2);
+}
+
+/**
  * @brief Initial GPIO configuration.
  *
  * Set GPIO modes and initial states.
@@ -86,6 +118,9 @@ void disable_systick_interruption(void)
  */
 static void setup_gpio(void)
 {
+	/* Battery */
+	gpio_mode_setup(GPIOC, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO4);
+
 	/* LEDs */
 	gpio_mode_setup(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE,
 			GPIO0 | GPIO1 | GPIO2 | GPIO3);
@@ -209,5 +244,6 @@ void setup(void)
 	setup_speaker();
 	setup_motor_driver();
 	setup_usart();
+	setup_adc2();
 	setup_systick();
 }

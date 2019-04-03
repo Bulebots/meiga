@@ -46,6 +46,13 @@
  */
 #define MAX_PWM_SATURATION_PERIOD 0.01
 
+/** ADC constants */
+#define ADC_RESOLUTION 4096
+#define ADC_LSB (3.3 / ADC_RESOLUTION)
+
+/** Voltage divider */
+#define VOLT_DIV_FACTOR ((47. + 10.) / 10.)
+
 void setup(void);
 void enable_systick_interruption(void);
 void disable_systick_interruption(void);
