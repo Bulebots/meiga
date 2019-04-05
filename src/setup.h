@@ -15,6 +15,8 @@
 #include <libopencm3/stm32/timer.h>
 #include <libopencm3/stm32/usart.h>
 
+#include "mmlib/mpu.h"
+
 #include "mylibopencm3.h"
 
 /** Universal constants */
@@ -54,6 +56,8 @@
 #define VOLT_DIV_FACTOR ((47. + 10.) / 10.)
 
 void setup(void);
+void setup_spi_low_speed(void);
+void setup_spi_high_speed(void);
 void enable_systick_interruption(void);
 void disable_systick_interruption(void);
 

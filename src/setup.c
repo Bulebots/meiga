@@ -32,6 +32,9 @@ static void setup_clock(void)
 	/* Bluetooth */
 	rcc_periph_clock_enable(RCC_USART1);
 
+	/* Gyroscope */
+	rcc_periph_clock_enable(RCC_SPI3);
+
 	/* Timers */
 	rcc_periph_clock_enable(RCC_TIM3);
 	rcc_periph_clock_enable(RCC_TIM4);
@@ -154,6 +157,14 @@ static void setup_gpio(void)
 
 	/* Buttons */
 	gpio_mode_setup(GPIOC, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO13);
+
+	/* MPU */
+	gpio_mode_setup(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO15);
+	gpio_set(GPIOA, GPIO15);
+
+	gpio_mode_setup(GPIOC, GPIO_MODE_AF,
+			GPIO_PUPD_PULLDOWN, GPIO10 | GPIO11 | GPIO12);
+	gpio_set_af(GPIOC, GPIO_AF6, GPIO10 | GPIO11 | GPIO12);
 }
 
 /**
@@ -256,6 +267,55 @@ static void setup_encoders(void)
 }
 
 /**
+ * @brief Setup SPI.
+ *
+ * SPI is configured as follows:
+ *
+ * - Master mode.
+ * - Clock baud rate: PCLK1 / speed_div; PCLK1 = 36MHz.
+ * - Clock polarity: 0 (idle low; leading edge is a rising edge).
+ * - Clock phase: 0 (out changes on the trailing edge and input data
+ *   captured on rising edge).
+ * - Data frame format: 8-bits.
+ * - Frame format: MSB first.
+ *
+ * NSS is configured to be managed by software.
+ */
+static void setup_spi(uint8_t speed_div)
+{
+	spi_reset(SPI3);
+
+	spi_init_master(SPI3, speed_div, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
+			SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_8BIT,
+			SPI_CR1_MSBFIRST);
+
+	spi_enable_software_slave_management(SPI3);
+	spi_set_nss_high(SPI3);
+
+	spi_enable(SPI3);
+}
+
+/**
+ * @brief Setup SPI for gyroscope read, less than 20 MHz.
+ *
+ * The clock baudrate is 84 MHz / 8 = 10.5 MHz.
+ */
+void setup_spi_high_speed(void)
+{
+	setup_spi(SPI_CR1_BAUDRATE_FPCLK_DIV_8);
+}
+
+/**
+ * @brief Setup SPI for gyroscope Write, less than 1 MHz.
+ *
+ * The clock baudrate is 84 MHz / 128 = 0.65625 MHz.
+ */
+void setup_spi_low_speed(void)
+{
+	setup_spi(SPI_CR1_BAUDRATE_FPCLK_DIV_128);
+}
+
+/**
  * @brief Setup PWM for the speaker.
  *
  * TIM11 is used to generate the PWM signals for the speaker:
@@ -296,5 +356,6 @@ void setup(void)
 	setup_encoders();
 	setup_usart();
 	setup_adc2();
+	setup_mpu();
 	setup_systick();
 }
