@@ -11,7 +11,7 @@ An awesome maze-solving micromouse robot.
 Please read the `Meiga documentation`_ for a bit more detailed introduction.
 
 
-.. _`Bulebule documentation`:
+.. _`Meiga documentation`:
    https://meiga.readthedocs.io/
 
 .. |logo| image:: ./docs/source/images/logo.svg
