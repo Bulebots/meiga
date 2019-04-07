@@ -52,6 +52,25 @@ static void setup_clock(void)
 }
 
 /**
+ * @brief Exceptions configuration.
+ *
+ * This function configures Nested Vectored Interrupt Controller for IRQ and
+ * System Control Block for system interruptions.
+ *
+ * Interruptions enabled:
+ *
+ * - DMA 2 stream 7 interrupt.
+ * - USART1 interrupt.
+ *
+ * @see Programming Manual (PM0214).
+ */
+static void setup_exceptions(void)
+{
+	nvic_enable_irq(NVIC_DMA2_STREAM7_IRQ);
+	nvic_enable_irq(NVIC_USART1_IRQ);
+}
+
+/**
  * @brief Set SysTick interruptions frequency and enable SysTick counter.
  *
  * SYSCLK is at 168 MHz as well as the Advanced High-permormance Bus (AHB)
@@ -350,6 +369,7 @@ static void setup_speaker(void)
 void setup(void)
 {
 	setup_clock();
+	setup_exceptions();
 	setup_gpio();
 	setup_speaker();
 	setup_motor_driver();
