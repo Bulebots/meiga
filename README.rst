@@ -6,7 +6,7 @@
 Meiga
 =====
 
-An awesome maze-solving micromouse robot.
+A magical maze-solving micromouse robot.
 
 Please read the `Meiga documentation`_ for a bit more detailed introduction.
 
