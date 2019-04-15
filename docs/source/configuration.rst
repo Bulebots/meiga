@@ -131,4 +131,4 @@ References
 .. _`STM32F405xx reference manual`:
    https://www.st.com/resource/en/reference_manual/DM00031020.pdf
 .. _`IE2-1024 encoder`:
-   https://fmcc.faulhaber.com/resources/img/EN_IE2-1024_DFF.PDF
+   https://www.faulhaber.com/fileadmin/Import/Media/EN_IE2-1024_DFF.pdf
