@@ -1,0 +1,44 @@
+dist: xenial
+
+language: python
+
+python:
+    - 3.7
+
+addons:
+  apt:
+    sources:
+      - llvm-toolchain-trusty-6.0
+      - sourceline: 'ppa:team-gcc-arm-embedded/ppa'
+    packages:
+      - clang-format-6.0
+      - gcc-arm-embedded
+      - libbluetooth-dev
+      - libglu1-mesa
+
+install:
+  - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - conda update -y -n base -c defaults conda
+  - conda install -y gxx_linux-64
+  - conda env create -f environment.yaml
+
+before_script:
+  - clang-format() { clang-format-6.0 $@; }
+  - export -f clang-format
+  - ./scripts/setup_libopencm3.sh
+
+script:
+  - ./scripts/checkformat_clang.sh
+  - ./scripts/checkformat_checkpatch.sh
+  - source activate meiga
+  - flake8
+  - doc8 README.rst
+  - doc8 docs/source/
+  - rm -rf docs/build
+  - make -C docs html SPHINXOPTS="-W -E"
+  - make -C docs linkcheck
+
+notifications:
+  email: false
