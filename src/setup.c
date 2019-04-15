@@ -164,9 +164,9 @@ static void setup_gpio(void)
 			GPIO6 | GPIO7 | GPIO8 | GPIO9);
 	gpio_set_af(GPIOC, GPIO_AF3, GPIO6 | GPIO7 | GPIO8 | GPIO9);
 
-        /* Encoders */
+	/* Encoders */
 	gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE,
-                        GPIO4 | GPIO5 | GPIO6 | GPIO7);
+			GPIO4 | GPIO5 | GPIO6 | GPIO7);
 	gpio_set_af(GPIOB, GPIO_AF2, GPIO4 | GPIO5 | GPIO6 | GPIO7);
 
 	/* Bluetooth */
@@ -181,8 +181,8 @@ static void setup_gpio(void)
 	gpio_mode_setup(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO15);
 	gpio_set(GPIOA, GPIO15);
 
-	gpio_mode_setup(GPIOC, GPIO_MODE_AF,
-			GPIO_PUPD_PULLDOWN, GPIO10 | GPIO11 | GPIO12);
+	gpio_mode_setup(GPIOC, GPIO_MODE_AF, GPIO_PUPD_PULLDOWN,
+			GPIO10 | GPIO11 | GPIO12);
 	gpio_set_af(GPIOC, GPIO_AF6, GPIO10 | GPIO11 | GPIO12);
 }
 
@@ -225,8 +225,7 @@ static void setup_motor_driver(void)
 	timer_set_mode(TIM8, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE,
 		       TIM_CR1_DIR_UP);
 
-	timer_set_prescaler(
-	    TIM8, (rcc_apb2_frequency / 24000000 - 1));
+	timer_set_prescaler(TIM8, (rcc_apb2_frequency / 24000000 - 1));
 	timer_set_repetition_counter(TIM8, 0);
 	timer_enable_preload(TIM8);
 	timer_continuous_mode(TIM8);
